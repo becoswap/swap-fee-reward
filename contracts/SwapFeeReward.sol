@@ -217,22 +217,21 @@ contract SwapFeeReward is Ownable {
         address _beco,
         IOracle _Oracle,
         address _targetToken,
-        address _masterChef,
+        address _masterChef
     ) public {
         factory = _factory;
         router = _router;
         INIT_CODE_HASH = _INIT_CODE_HASH;
-        beco = _beco;
+        beco = IERC20(_beco);
         oracle = _Oracle;
         targetToken = _targetToken;
-        masterChef = IMasterChef(_masterChef)
+        masterChef = IMasterChef(_masterChef);
 
-        
     }
 
     function deposit(uint256 _poolId) public onlyOwner {
-        poolId = _poolId
-        masterChef.deposit(_poolId, 1 ether, address(0x00))
+        poolId = _poolId;
+        masterChef.deposit(_poolId, 1 ether, address(0x0));
     }
 
     function sortTokens(address tokenA, address tokenB)
@@ -273,7 +272,7 @@ contract SwapFeeReward is Ownable {
         returns (uint256 swapFee)
     {
         swapFee = uint256(1000).sub(
-            IBSWPair(pairFor(tokenA, tokenB)).swapFee()
+            IBecoSwapPair(pairFor(tokenA, tokenB)).swapFee()
         );
     }
 
@@ -321,15 +320,25 @@ contract SwapFeeReward is Ownable {
     function withdraw() public returns (bool) {
         uint256 balance = _balances[msg.sender];
         if (balance > 0) {
-            if (beco.balanceOf(this) < balance) {
-                masterChef.deposit(poolId, 0, address(0x0))
+            if (beco.balanceOf(address(this)) < balance) {
+                masterChef.deposit(poolId, 0, address(0x0));
             }
-            beco.safeTransfer(msg.sender, balance)
+            safeBecoTransfer(msg.sender, balance);
             _balances[msg.sender] = _balances[msg.sender].sub(balance);
             emit Withdraw(msg.sender, balance);
             return true;
         }
         return false;
+    }
+    
+     // Safe beco transfer function, just in case if rounding error causes pool to not have enough BECO.
+    function safeBecoTransfer(address _to, uint256 _amount) internal {
+        uint256 becoBal = beco.balanceOf(address(this));
+        if (_amount > becoBal) {
+            beco.transfer(_to, becoBal);
+        } else {
+            beco.transfer(_to, _amount);
+        }
     }
 
     function getQuantity(
