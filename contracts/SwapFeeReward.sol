@@ -239,11 +239,11 @@ contract SwapFeeReward is Ownable {
         pure
         returns (address token0, address token1)
     {
-        require(tokenA != tokenB, "BSWSwapFactory: IDENTICAL_ADDRESSES");
+        require(tokenA != tokenB, "BecoSwapFactory: IDENTICAL_ADDRESSES");
         (token0, token1) = tokenA < tokenB
             ? (tokenA, tokenB)
             : (tokenB, tokenA);
-        require(token0 != address(0), "BSWSwapFactory: ZERO_ADDRESS");
+        require(token0 != address(0), "BecoSwapFactory: ZERO_ADDRESS");
     }
 
     function pairFor(address tokenA, address tokenB)
