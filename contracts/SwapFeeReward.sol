@@ -319,10 +319,6 @@ contract SwapFeeReward is Ownable {
     }
 
     function withdraw() public returns (bool) {
-        require(
-            maxMiningAmount > totalMined,
-            "SwapFeeReward: Mined all tokens"
-        );
         uint256 balance = _balances[msg.sender];
         if (balance > 0) {
             if (beco.balanceOf(this) < balance) {
